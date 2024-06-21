@@ -551,11 +551,14 @@ export interface ITreeViewProps {
   }) => void;
   /** Id of the node to focus */
   focusedId?: NodeId;
+  /** If true, the tree will listen to keydown events to navigate the tree */
+  accessibleSearchEnabled?: boolean;
 }
 
 const TreeView = React.forwardRef<HTMLUListElement, ITreeViewProps>(
   function TreeView(
     {
+      accessibleSearchEnabled = true,
       data,
       selectedIds,
       nodeRenderer,
@@ -628,6 +631,7 @@ const TreeView = React.forwardRef<HTMLUListElement, ITreeViewProps>(
           });
         }}
         onKeyDown={handleKeyDown({
+          accessibleSearchEnabled,
           data,
           tabbableId: state.tabbableId,
           expandedIds: state.expandedIds,
@@ -674,6 +678,7 @@ const TreeView = React.forwardRef<HTMLUListElement, ITreeViewProps>(
 );
 
 const handleKeyDown = ({
+  accessibleSearchEnabled = true,
   data,
   expandedIds,
   selectedIds,
@@ -687,6 +692,7 @@ const handleKeyDown = ({
   togglableSelect,
   clickAction,
 }: {
+  accessibleSearchEnabled?: boolean;
   data: INode[];
   tabbableId: NodeId;
   expandedIds: Set<NodeId>;
@@ -950,7 +956,7 @@ const handleKeyDown = ({
         dispatch({ type: treeTypes.toggle, id, lastInteractedWith: id });
       return;
     default:
-      if (event.key.length === 1) {
+      if (event.key.length === 1 && accessibleSearchEnabled) {
         let currentId = getNextAccessible(data, id, expandedIds);
         while (currentId !== id) {
           if (currentId == null) {
